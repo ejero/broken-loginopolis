@@ -46,8 +46,10 @@ app.post('/login', async (req, res, next) => {
     if (!matchPw) {
       res.status(401).send('incorrect username or password');
       next();
-    } 
-    res.send(`successfully logged in user ${username}`);
+    } else {
+      res.send(`successfully logged in user ${username}`);
+
+    }
   } catch (error) {
     console.error(error);
   }
