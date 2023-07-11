@@ -17,9 +17,9 @@ app.get('/', async (req, res, next) => {
 
 // POST /register
 // TODO - takes req.body of {username, password} and creates a new user with the hashed password
-app.post('/register', async (req, res, next) => {
+app.get('/register', async (req, res, next) => {
   try {
-    let username = req.body.username;
+    let username = req.username;
     let pw = req.body.password;
   
     await User.create({username, password: await bcrypt.hash(pw, 5)})
@@ -36,14 +36,14 @@ app.post('/login', async (req, res, next) => {
     let username = req.body.username;
     let password = req.body.password;
   
-    let [user] = await User.findAll({
+    let [user] = await User.findOne({
       where: {
         username: username
       }
     })
     
-    let matchPw = await bcrypt.compare(password, user.password);
-    if (!matchPw) {
+    let matchPw = await bcrypt.compare(user.password, password);
+    if (matchPw) {
       res.status(401).send('incorrect username or password');
       next();
     } else {
