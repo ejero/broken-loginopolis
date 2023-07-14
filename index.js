@@ -4,7 +4,7 @@ const app = express();
 const { User } = require('./db');
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', async (req, res, next) => {
   try {
@@ -17,39 +17,41 @@ app.get('/', async (req, res, next) => {
 
 // POST /register
 // TODO - takes req.body of {username, password} and creates a new user with the hashed password
-app.get('/register', async (req, res, next) => {
+app.post('/register', async (req, res, next) => {
   try {
-    let username = req.username;
+    let username = req.body.username;
     let pw = req.body.password;
-  
-    await User.create({username, password: await bcrypt.hash(pw, 5)})
+
+
+    await User.create({ username, password: await bcrypt.hash(pw, 5) })
     res.send(`successfully created user ${username}`);
   } catch (error) {
     console.error(error);
   }
-  
+
 })
 // POST /login
 // TODO - takes req.body of {username, password}, finds user by username, and compares the password with the hashed version from the DB
 app.post('/login', async (req, res, next) => {
   try {
-    let username = req.body.username;
-    let password = req.body.password;
-  
-    let [user] = await User.findOne({
+    // let username = req.body.username;
+    // let password = req.body.password;
+    const { username, password } = req.body;
+
+    let user = await User.findOne({
       where: {
         username: username
       }
     })
-    
-    let matchPw = await bcrypt.compare(user.password, password);
+
+    let matchPw = await bcrypt.compare(password, user.password);
     if (matchPw) {
+      res.status(200).send(`successfully logged in user ${username}`);
+    } else {
       res.status(401).send('incorrect username or password');
       next();
-    } else {
-      res.send(`successfully logged in user ${username}`);
-
     }
+
   } catch (error) {
     console.error(error);
   }
